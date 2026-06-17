@@ -59,6 +59,27 @@ const SPRITE = {
   },
 };
 
+const WOLVES = {
+  frameWidth:  84,
+  frameHeight: 83.25,
+  numFrames:   4,
+  animSpeed:   5,
+  scale:       .5,
+  facing: "down",
+  rows: {
+    down:  0,
+    up:    3,
+    right: 2,
+    left:  1,
+  },
+  offsets: {
+    down:  { x: 0, y: 0  },
+    up:    { x: 0, y: 0  },
+    right: { x: 0, y: 0 },
+    left:  { x: 0, y: 0 },
+  },
+};
+
 // ------------------------------------------------------------
 // PLAYER CONFIGURATION
 // ------------------------------------------------------------
@@ -177,6 +198,7 @@ function preload() {
   // music          = loadSound("assets/sounds/music.mp3");
 
   characterSheet = loadImage("assets/images/101-civilian01.png");
+  enemySheet = loadImage("assets/images/warewolf_sprite.png");
 }
 
 // ============================================================
@@ -817,6 +839,21 @@ function drawEnemies() {
     fill(10);
     ellipse(e.x - 6, e.y - 4, 6, 6);
     ellipse(e.x + 6, e.y - 4, 6, 6);
+
+    imageMode(CENTER);
+    let row    = SPRITE.rows[player.facing];
+  let offset = SPRITE.offsets[player.facing];
+
+  // Source position on the sprite sheet (with offset applied)
+  let sx = (player.currentFrame * SPRITE.frameWidth)  + offset.x;
+  let sy = (row                 * SPRITE.frameHeight) + offset.y;
+
+  // Draw size (original frame size multiplied by scale)
+  let dw = SPRITE.frameWidth  * SPRITE.scale;
+  let dh = SPRITE.frameHeight * SPRITE.scale;
+
+  image(enemySheet, e.x, e.y, dw, dh, sx, sy, SPRITE.frameWidth, SPRITE.frameHeight);
+
     pop();
 
     e.blobT += 0.015;
@@ -860,7 +897,7 @@ function drawPlayer() {
   // Draw size (original frame size multiplied by scale)
   let dw = SPRITE.frameWidth  * SPRITE.scale;
   let dh = SPRITE.frameHeight * SPRITE.scale;
-
+// change this back 
   image(characterSheet, player.x, player.y, dw, dh, sx, sy, SPRITE.frameWidth, SPRITE.frameHeight);
 
   pop();
@@ -1119,5 +1156,7 @@ function animateSprite() {
     player.currentFrame = 0;
     player.frameTimer   = 0;
   }
+
+  
 }
 
