@@ -34,6 +34,31 @@ let camX = 0;
 let camY = 0;
 const CAM_SMOOTHING = 0.1;
 
+
+// ------------------------------------------------------------
+// SPRITE CONFIGURATION — Walking Character
+// 
+// ------------------------------------------------------------
+const SPRITE = {
+  frameWidth:  32,
+  frameHeight: 48,
+  numFrames:   4,
+  animSpeed:   5,
+  scale:       1.5,
+  rows: {
+    down:  0,
+    up:    3,
+    right: 2,
+    left:  1,
+  },
+  offsets: {
+    down:  { x: 0, y: 0  },
+    up:    { x: 0, y: 0  },
+    right: { x: 0, y: 0 },
+    left:  { x: 0, y: 0 },
+  },
+};
+
 // ------------------------------------------------------------
 // PLAYER CONFIGURATION
 // ------------------------------------------------------------
@@ -53,6 +78,8 @@ let player = {
   r: 22,
   blobT: 0,
   direction: { x: 0, y: -1 },
+  facing: "down",
+  isMoving: false,
   shootTimer: 0,
   health: 5,
   maxHealth: 5,
@@ -148,6 +175,8 @@ function preload() {
   // bossMusic      = loadSound("assets/sounds/bossmusic.mp3");
   // winSound       = loadSound("assets/sounds/win.wav");
   // music          = loadSound("assets/sounds/music.mp3");
+
+  characterSheet = loadImage("assets/images/101-civilian01.png");
 }
 
 // ============================================================
@@ -201,6 +230,7 @@ function draw() {
 
   if (gameState === STATE_PLAY) {
     handleInput();
+    animateSprite();
     applyBounce();
     updateBullets();
     updateEnemies();
@@ -441,6 +471,29 @@ function handleInput() {
   // Keep player inside world bounds
   player.x = constrain(player.x, player.r, WORLD_W - player.r);
   player.y = constrain(player.y, player.r, WORLD_H - player.r);
+
+  player.isMoving = false;
+
+  if (keyIsDown(87)) { // W — up
+    // player.y -= player.speed;
+    player.facing = "up";
+    player.isMoving = true;
+  }
+  if (keyIsDown(83)) { // S — down
+   // player.y += player.speed;
+    player.facing = "down";
+    player.isMoving = true;
+  }
+  if (keyIsDown(65)) { // A — left
+   // player.x -= player.speed;
+    player.facing = "left";
+    player.isMoving = true;
+  }
+  if (keyIsDown(68)) { // D — right
+   // player.x += player.speed;
+    player.facing = "right";
+    player.isMoving = true;
+  }
 
   if (player.shootTimer > 0) player.shootTimer--;
 
@@ -793,26 +846,22 @@ function drawPlayer() {
   fill(0, 200, 180);
   noStroke();
 
-  beginShape();
-  let numPoints = 48;
-  for (let i = 0; i < numPoints; i++) {
-    let angle    = (TWO_PI / numPoints) * i;
-    let noiseVal = noise(cos(angle) * 0.8 + player.blobT, sin(angle) * 0.8 + player.blobT);
-    let r        = player.r + map(noiseVal, 0, 1, -6, 6);
-    vertex(player.x + cos(angle) * r, player.y + sin(angle) * r);
-  }
-  endShape(CLOSE);
+  
+  imageMode(CENTER);
 
-  fill(10);
-  ellipse(player.x - 7, player.y - 5, 7, 7);
-  ellipse(player.x + 7, player.y - 5, 7, 7);
+  // Get the correct row and offset for the current direction
+  let row    = SPRITE.rows[player.facing];
+  let offset = SPRITE.offsets[player.facing];
 
-  fill(255);
-  ellipse(
-    player.x + player.direction.x * (player.r - 4),
-    player.y + player.direction.y * (player.r - 4),
-    8
-  );
+  // Source position on the sprite sheet (with offset applied)
+  let sx = (player.currentFrame * SPRITE.frameWidth)  + offset.x;
+  let sy = (row                 * SPRITE.frameHeight) + offset.y;
+
+  // Draw size (original frame size multiplied by scale)
+  let dw = SPRITE.frameWidth  * SPRITE.scale;
+  let dh = SPRITE.frameHeight * SPRITE.scale;
+
+  image(characterSheet, player.x, player.y, dw, dh, sx, sy, SPRITE.frameWidth, SPRITE.frameHeight);
 
   pop();
   player.blobT += 0.015;
@@ -1046,3 +1095,29 @@ function keyPressed() {
     // music.loop();
   }
 }
+
+// ------------------------------------------------------------
+// animateSprite()
+// Advances the animation frame at a controlled speed.
+// frameTimer counts up every draw() call.
+// When it reaches animSpeed, the frame advances.
+// Only animates when the player is moving — stays on frame 0
+// when idle so the character stands still.
+// ------------------------------------------------------------
+function animateSprite() {
+  if (player.isMoving) {
+    player.frameTimer++;
+
+    // When the timer reaches animSpeed, advance to the next frame
+    // % numFrames wraps back to 0 after the last frame
+    if (player.frameTimer >= SPRITE.animSpeed) {
+      player.frameTimer = 0;
+      player.currentFrame = (player.currentFrame + 1) % SPRITE.numFrames;
+    }
+  } else {
+    // Reset to standing frame when not moving
+    player.currentFrame = 0;
+    player.frameTimer   = 0;
+  }
+}
+
