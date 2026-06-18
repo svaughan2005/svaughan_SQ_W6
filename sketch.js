@@ -64,7 +64,7 @@ const WOLVES = {
   frameHeight: 83.25,
   numFrames:   4,
   animSpeed:   5,
-  scale:       .5,
+  scale:       1,
   facing: "down",
   rows: {
     down:  0,
@@ -75,6 +75,26 @@ const WOLVES = {
   offsets: {
     down:  { x: 0, y: 0  },
     up:    { x: 0, y: 0  },
+    right: { x: 0, y: 0 },
+    left:  { x: 0, y: 0 },
+  },
+};
+
+const BOSS_SPRITE = {
+  frameWidth:  84,      // same as wolves (or change if using a different sheet)
+  frameHeight: 83.25,
+  numFrames:   4,
+  animSpeed:   10,       // slower or faster animation
+  scale:       3,       // MUCH bigger boss
+  rows: {
+    down:  0,
+    up:    3,
+    right: 2,
+    left:  1,
+  },
+  offsets: {
+    down:  { x: 0, y: 0 },
+    up:    { x: 0, y: 0 },
     right: { x: 0, y: 0 },
     left:  { x: 0, y: 0 },
   },
@@ -252,7 +272,9 @@ function draw() {
 
   if (gameState === STATE_PLAY) {
     handleInput();
+
     animateSprite();
+
     applyBounce();
     updateBullets();
     updateEnemies();
@@ -269,6 +291,9 @@ function draw() {
 
   } else if (gameState === STATE_BOSS) {
     handleInput();
+
+     animateSprite();
+     
     applyBounce();
     updateBullets();
     updateBoss();
@@ -566,7 +591,10 @@ function checkWaveSpawns() {
         x:     random(100, WORLD_W - 100),
         y:     random(BOSS_ZONE_Y + 50, BOSS_ZONE_Y + 300),
         r:     20,
+        facing: "down",
         speed: data.speed,
+        currentFrame: 0,
+        frameTimer: 0,
         blobT: random(100),
       });
     }
@@ -605,6 +633,10 @@ function spawnBoss() {
     retreatY:    bossData.retreatY,
     chargeVX:    0,
     chargeVY:    0,
+
+    facing: "down",
+    currentFrame: 0,
+    frameTimer: 0,
   };
 
   enemies = [];
@@ -630,6 +662,9 @@ function updateEnemies() {
       e.y += (dy / d) * e.speed;
     }
   }
+
+ // updateEnemyFacing(e);
+ //   animateEnemy(e);
 }
 
 // ------------------------------------------------------------
@@ -681,6 +716,17 @@ function updateBoss() {
       boss.y += (dy / d) * boss.retreatSpeed;
     }
   }
+
+  let dx = player.x - boss.x;
+let dy = player.y - boss.y;
+
+if (Math.abs(dx) > Math.abs(dy)) {
+  boss.facing = dx > 0 ? "right" : "left";
+} else {
+  boss.facing = dy > 0 ? "down" : "up";
+}
+
+  animateBoss();
 }
 
 // ------------------------------------------------------------
@@ -787,6 +833,8 @@ function drawBoss() {
   if (!boss) return;
 
   push();
+  
+  /*
   let isCharging = boss.state === "charging";
   fill(isCharging ? color(255, 180, 30) : color(255, 130, 20));
   noStroke();
@@ -810,6 +858,21 @@ function drawBoss() {
   strokeWeight(4);
   line(boss.x - 26, boss.y - 22, boss.x - 10, boss.y - 18);
   line(boss.x + 10, boss.y - 18, boss.x + 26, boss.y - 22);
+*/
+   imageMode(CENTER);
+
+  let row    = BOSS_SPRITE.rows[boss.facing];
+  let offset = BOSS_SPRITE.offsets[boss.facing];
+
+  let sx = (boss.currentFrame * BOSS_SPRITE.frameWidth) + offset.x;
+  let sy = (row * BOSS_SPRITE.frameHeight) + offset.y;
+
+  let dw = BOSS_SPRITE.frameWidth  * BOSS_SPRITE.scale;
+  let dh = BOSS_SPRITE.frameHeight * BOSS_SPRITE.scale;
+
+  image(enemySheet, boss.x, boss.y, dw, dh, sx, sy, BOSS_SPRITE.frameWidth, BOSS_SPRITE.frameHeight);
+
+  
 
   pop();
   boss.blobT += 0.02;
@@ -826,6 +889,7 @@ function drawEnemies() {
     fill(255, 150, 30);
     noStroke();
 
+    /*
     beginShape();
     let numPoints = 48;
     for (let j = 0; j < numPoints; j++) {
@@ -839,20 +903,23 @@ function drawEnemies() {
     fill(10);
     ellipse(e.x - 6, e.y - 4, 6, 6);
     ellipse(e.x + 6, e.y - 4, 6, 6);
+*/
 
     imageMode(CENTER);
-    let row    = SPRITE.rows[player.facing];
-  let offset = SPRITE.offsets[player.facing];
+   // let row    = WOLVES.rows[player.facing];
+ // let offset = WOLVES.offsets[player.facing];
+ let row = WOLVES.rows[e.facing];
+let offset = WOLVES.offsets[e.facing];
 
   // Source position on the sprite sheet (with offset applied)
-  let sx = (player.currentFrame * SPRITE.frameWidth)  + offset.x;
-  let sy = (row                 * SPRITE.frameHeight) + offset.y;
+  let sx = (e.currentFrame * WOLVES.frameWidth)  + offset.x;
+  let sy = (row                 * WOLVES.frameHeight) + offset.y;
 
   // Draw size (original frame size multiplied by scale)
-  let dw = SPRITE.frameWidth  * SPRITE.scale;
-  let dh = SPRITE.frameHeight * SPRITE.scale;
+  let dw = WOLVES.frameWidth  * WOLVES.scale;
+  let dh = WOLVES.frameHeight * WOLVES.scale;
 
-  image(enemySheet, e.x, e.y, dw, dh, sx, sy, SPRITE.frameWidth, SPRITE.frameHeight);
+  image(enemySheet, e.x, e.y, dw, dh, sx, sy, WOLVES.frameWidth, WOLVES.frameHeight);
 
     pop();
 
@@ -1158,5 +1225,88 @@ function animateSprite() {
   }
 
   
+///*
+  for (let e of enemies) {
+  e.facing = getEnemyFacing(e, player);
+
+   
+
+
+
+  e.frameTimer += .25;
+
+  if (floor(e.frameTimer % WOLVES.numFrames === 0)) {
+    e.currentFrame = 0;
+  } else if (floor(e.frameTimer % WOLVES.numFrames === 1)) {
+    e.currentFrame = 1;
+  } else if (floor(e.frameTimer % WOLVES.numFrames === 2)) {
+    e.currentFrame = 2;
+  } else if (floor(e.frameTimer % WOLVES.numFrames === 3)) {
+    e.currentFrame = 3;
+  }
+
+/*
+  if (e.frameTimer % WOLVES.numFrames != 0) {
+    e.currentFrame += 1;
+  } else if (e.frameTimer % WOLVES.numFrames === 0) {
+    e.currentFrame = 0;
+  }
+    */
+  /*
+  if (e.frameTimer > 0) {
+    e.frameTimer--;
+    
+  } else {
+ e.currentFrame = (e.currentFrame + 1) % WOLVES.numFrames;
+  e.frameTimer = WOLVES.animSpeed;
+  }
+*/
+  
+
+  }
+// */
+
+
 }
 
+
+
+function animateEnemy(e) {
+  /*
+  for (let e of enemies) {
+  e.facing = getEnemyFacing(e, player);
+  }
+  */
+  
+  if (e.frameTimer > 0) {
+    e.frameTimer--;
+    return;
+  }
+
+  e.currentFrame = (e.currentFrame + 1) % WOLVES.numFrames;
+  e.frameTimer = WOLVES.animSpeed;
+}
+
+function getEnemyFacing(e, player) {
+  let dx = player.x - e.x;
+  let dy = player.y - e.y;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    // Horizontal movement dominates
+    return dx > 0 ? "right" : "left";
+  } else {
+    // Vertical movement dominates
+    return dy > 0 ? "down" : "up";
+  }
+}
+
+
+function animateBoss() {
+  if (boss.frameTimer > 0) {
+    boss.frameTimer--;
+    return;
+  }
+
+  boss.currentFrame = (boss.currentFrame + 1) % BOSS_SPRITE.numFrames;
+  boss.frameTimer = BOSS_SPRITE.animSpeed;
+}
