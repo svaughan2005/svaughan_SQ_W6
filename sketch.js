@@ -193,14 +193,16 @@ let gameState = STATE_PLAY;
 // ------------------------------------------------------------
 // SOUNDS — uncomment and fill in paths to add audio
 // ------------------------------------------------------------
-// let shootSound;
-// let hitSound;
-// let playerHitSound;
-// let bossHitSound;
-// let bossMusic;
-// let winSound;
- let music;
+ let shootSound;
+ let hitSound;
+ let playerHitSound;
+ let bossHitSound;
+ let bossMusic;
+ let winSound;
 
+  let music;
+
+ // let bgMusic;
 // ============================================================
 // preload()
 // ============================================================
@@ -209,14 +211,16 @@ function preload() {
   obstacleData = loadJSON("data/obstacles.json");
 
   // Uncomment to load sounds:
-  // shootSound     = loadSound("assets/sounds/shoot.wav");
-  // hitSound       = loadSound("assets/sounds/hit.wav");
-  // playerHitSound = loadSound("assets/sounds/playerhit.wav");
-  // bossHitSound   = loadSound("assets/sounds/bosshit.wav");
-  // bossMusic      = loadSound("assets/sounds/bossmusic.mp3");
-  // winSound       = loadSound("assets/sounds/win.wav");
+   shootSound     = loadSound("assets/sounds/jump_sfx.mp3");
+   hitSound       = loadSound("assets/sounds/hard-punch.mp3");
+   playerHitSound = loadSound("assets/sounds/hard-punch.mp3");
+   bossHitSound   = loadSound("assets/sounds/hard-punch.mp3");
+   bossMusic      = loadSound("assets/sounds/boss-music.mp3");
+   winSound       = loadSound("assets/sounds/winning_sfx.mp3");
+  
    music          = loadSound("assets/sounds/eerie-music.mp3");
 
+  // bgMusic = loadSound("assets/sounds/eerie-music.mp3");
   characterSheet = loadImage("assets/images/101-civilian01.png");
   enemySheet = loadImage("assets/images/warewolf_sprite.png");
 }
@@ -253,6 +257,7 @@ function setup() {
 
   // Uncomment to start music:
    music.loop();
+  // bgMusic.loop();
 }
 
 // ============================================================
@@ -420,11 +425,11 @@ function checkObstaclePlayerCollision() {
         player.bounceVY = (dy / len) * 8;
       }
 
-      // playerHitSound.play();
+       playerHitSound.play();
 
       if (player.health <= 0) {
         gameState = STATE_OVER;
-        // music.stop();
+         music.stop();
       }
       break;
     }
@@ -552,7 +557,7 @@ function handleInput() {
       vy: player.direction.y * BULLET_SPEED,
     });
     player.shootTimer = SHOOT_COOLDOWN;
-    // shootSound.play();
+     shootSound.play();
   }
 }
 
@@ -642,8 +647,8 @@ function spawnBoss() {
   enemies = [];
   gameState = STATE_BOSS;
 
-   //music.stop();
-  // bossMusic.loop();
+   music.stop();
+   bossMusic.loop();
 }
 
 // ------------------------------------------------------------
@@ -740,12 +745,12 @@ function checkBulletBossCollision() {
     if (d < boss.r + 6) {
       bullets.splice(i, 1);
       boss.health--;
-      // bossHitSound.play();
+       bossHitSound.play();
 
       if (boss.health <= 0) {
         gameState = STATE_WIN;
-        // winSound.play();
-        // bossMusic.stop();
+         winSound.play();
+         bossMusic.stop();
       }
       break;
     }
@@ -763,11 +768,11 @@ function checkBossPlayerCollision() {
     player.health--;
     player.invincible      = true;
     player.invincibleTimer = INVINCIBLE_FRAMES;
-    // playerHitSound.play();
+     playerHitSound.play();
 
     if (player.health <= 0) {
       gameState = STATE_OVER;
-      // bossMusic.stop();
+       bossMusic.stop();
     }
   }
 }
@@ -784,7 +789,7 @@ function checkEnemyPlayerCollision() {
       player.health--;
       player.invincible      = true;
       player.invincibleTimer = INVINCIBLE_FRAMES;
-      // playerHitSound.play();
+       playerHitSound.play();
 
       if (player.health <= 0) {
         gameState = STATE_OVER;
@@ -806,7 +811,7 @@ function checkBulletEnemyCollisions() {
         bullets.splice(i, 1);
         enemies.splice(j, 1);
         score++;
-        // hitSound.play();
+         hitSound.play();
         break;
       }
     }
