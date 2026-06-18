@@ -199,7 +199,7 @@ let gameState = STATE_PLAY;
 // let bossHitSound;
 // let bossMusic;
 // let winSound;
-// let music;
+ let music;
 
 // ============================================================
 // preload()
@@ -215,7 +215,7 @@ function preload() {
   // bossHitSound   = loadSound("assets/sounds/bosshit.wav");
   // bossMusic      = loadSound("assets/sounds/bossmusic.mp3");
   // winSound       = loadSound("assets/sounds/win.wav");
-  // music          = loadSound("assets/sounds/music.mp3");
+   music          = loadSound("assets/sounds/eerie-music.mp3");
 
   characterSheet = loadImage("assets/images/101-civilian01.png");
   enemySheet = loadImage("assets/images/warewolf_sprite.png");
@@ -252,7 +252,7 @@ function setup() {
   camY = player.y - height / 2;
 
   // Uncomment to start music:
-  // music.loop();
+   music.loop();
 }
 
 // ============================================================
@@ -642,7 +642,7 @@ function spawnBoss() {
   enemies = [];
   gameState = STATE_BOSS;
 
-  // music.stop();
+   //music.stop();
   // bossMusic.loop();
 }
 
@@ -788,7 +788,7 @@ function checkEnemyPlayerCollision() {
 
       if (player.health <= 0) {
         gameState = STATE_OVER;
-        // music.stop();
+         music.stop();
       }
       break;
     }
@@ -1196,7 +1196,7 @@ function keyPressed() {
     camX = player.x - width / 2;
     camY = player.y - height / 2;
 
-    // music.loop();
+     music.loop();
   }
 }
 
