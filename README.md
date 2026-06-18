@@ -32,7 +32,7 @@ Explore the world, survive enemy waves as you move north, then enter the glowing
 |[2] `assets/sounds/jump_sfx.mp3`| EdR on pixabay.com|
 |[4] `assets/sounds/winning_sfx.mp3`| floraphonic on pixabay.com |
 
-No external assets used. All visuals are generated with p5.js.
+
 
 ## References
 
