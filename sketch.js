@@ -199,6 +199,7 @@ let gameState = STATE_PLAY;
  let bossHitSound;
  let bossMusic;
  let winSound;
+ let bgImg;
 
   let music;
 
@@ -223,6 +224,7 @@ function preload() {
   // bgMusic = loadSound("assets/sounds/eerie-music.mp3");
   characterSheet = loadImage("assets/images/101-civilian01.png");
   enemySheet = loadImage("assets/images/warewolf_sprite.png");
+  bgImg = loadImage("assets/images/bg-forest.png");
 }
 
 // ============================================================
@@ -458,6 +460,8 @@ function applyBounce() {
 // Only shapes near the camera are drawn for performance.
 // ------------------------------------------------------------
 function drawBackground() {
+  image(bgImg, 0, 0, WORLD_W, WORLD_H);
+  /*
   noStroke();
   for (let i = 0; i < bgShapes.length; i++) {
     let s = bgShapes[i];
@@ -476,6 +480,7 @@ function drawBackground() {
       rect(s.x - s.size / 2, s.y - s.size / 2, s.size, s.size, 3);
     }
   }
+    */
 
   // World boundary outline
   noFill();
